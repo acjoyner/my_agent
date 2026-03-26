@@ -1,0 +1,107 @@
+{
+  "preferences": {},
+  "history": [
+    {
+      "timestamp": "2026-03-23T20:25:52.568785",
+      "user": "### Annotation → Column Mapping",
+      "agent": "Got it! Starting a new section.\n\n---\n\n```markdown\n| Concept | Hibernate (Java) | Entity Framework (.NET) |\n|---|---|---|\n| Mark a class as a table | `@Entity` | `[Table]` / inherits `DbContext` |\n| Primary key | `@Id` | `[Key]` |\n| Auto-increment | `@GeneratedValue` | `[DatabaseGenerated]` |\n| Column constraints | `@Column(nullable=false)` | `[Required]` |\n| The \"DbContext\" equivalent | `JpaRepository` | `DbContext` |\n| Save a record | `repository.save(obj)` | `context.SaveChanges()` |\n| LINQ eq"
+    },
+    {
+      "timestamp": "2026-03-23T20:25:57.853050",
+      "user": "```java",
+      "agent": "Got it! You're starting a Java code block. Please paste the code and I'll help format or explain it in the context of your Hibernate vs Entity Framework comparison.\n\n---\n\n```markdown\n| Concept | Hibernate (Java) | Entity Framework (.NET) |\n|---|---|---|\n| Mark a class as a table | `@Entity` | `[Table]` / inherits `DbContext` |\n| Primary key | `@Id` | `[Key]` |\n| Auto-increment | `@GeneratedValue` | `[DatabaseGenerated]` |\n| Column constraints | `@Column(nullable=false)` | `[Required]` |\n| The \"D"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:00.475903",
+      "user": "@Entity                          // \"this class is a database table\"",
+      "agent": "Got it! Continuing the Java code block with annotations explained.\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n```\n\nWaiting for more lines — feel free to continue pasting the rest of the annotated entity class!"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:06.585723",
+      "user": "@Table(name = \"products\")        // \"the table is named 'products'\"",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\n```\n\nContinue pasting — I'll keep building the annotated example!"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:12.994279",
+      "user": "public class Product {",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n```\n\nKeep going — ready for the fields and their annotations!"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:15.605487",
+      "user": "@Id",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n```\n\nContinue — expecting `@GeneratedValue` and the field declaration next!"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:23.466209",
+      "user": "@GeneratedValue(strategy = GenerationType.IDENTITY)",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n```\n\nNext up — the primary key field (e.g., `private Long id;`) and more column mappings!"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:25.817094",
+      "user": "private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n```\n\nKeep going — ready for more fields like `name`, `price`, etc.!"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:32.560274",
+      "user": "@Column(nullable = false, length = 200)",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n```\n\nExpecting something like `private String name;` next!"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:35.151174",
+      "user": "private String name;         // → name VARCHAR(200) NOT NULL",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n```\n\nKeep going — `price`, `description`, `createdAt`? Ready for more f"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:41.808885",
+      "user": "@Column(columnDefinition = \"TEXT\")",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n```\n\nExpecting something like `"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:45.098971",
+      "user": "private String description;  // → description TEXT (unlimited length)",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n    private String description;"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:51.000513",
+      "user": "@Column(nullable = false, precision = 10, scale = 2)",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n    private String description;"
+    },
+    {
+      "timestamp": "2026-03-23T20:26:54.573311",
+      "user": "private BigDecimal price;    // → price DECIMAL(10,2) NOT NULL",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n    private String description;"
+    },
+    {
+      "timestamp": "2026-03-23T20:27:01.810781",
+      "user": "@Column(nullable = false, updatable = false)",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n    private String description;"
+    },
+    {
+      "timestamp": "2026-03-23T20:27:05.750377",
+      "user": "private LocalDateTime createdAt;  // updatable=false → never included in UPDATEs",
+      "agent": "Got it!\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n    private String description;"
+    },
+    {
+      "timestamp": "2026-03-23T20:27:17.178503",
+      "user": "}",
+      "agent": "Got it! Here's the complete entity:\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n   "
+    },
+    {
+      "timestamp": "2026-03-23T20:27:24.477290",
+      "user": "```",
+      "agent": "Here's the complete JPA entity:\n\n---\n\n```java\n@Entity                          // \"this class is a database table\"\n@Table(name = \"products\")        // \"the table is named 'products'\"\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;             // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;         // → name VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n    pri"
+    },
+    {
+      "timestamp": "2026-03-23T20:27:32.681984",
+      "user": "> **Note on BigDecimal:** Never use `float` or `double` for money. They have binary rounding errors (`0.1 + 0.2 = 0.30000000000000004`). `BigDecimal` is exact.",
+      "agent": "Great note! Here's a quick summary of what you've built:\n\n---\n\n## JPA Entity Summary: `Product`\n\n```java\n@Entity\n@Table(name = \"products\")\npublic class Product {\n\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;                    // → PRIMARY KEY BIGINT AUTO_INCREMENT\n\n    @Column(nullable = false, length = 200)\n    private String name;                // → VARCHAR(200) NOT NULL\n\n    @Column(columnDefinition = \"TEXT\")\n    private String description;         //"
+    },
+    {
+      "timestamp": "2026-03-23T20:27:40.855298",
+      "user": "### Lifecycle Callbacks",
+      "agent": "### Lifecycle Callbacks\n\nJPA provides annotations to hook into entity lifecycle events:\n\n```java\n@Entity\n@Table(name = \"products\")\npublic class Product {\n\n    // ... fields ...\n\n    @Column(nullable = false, updatable = false)\n    private LocalDateTime createdAt;\n\n    @Column(nullable = false)\n    private LocalDateTime updatedAt;\n\n    @PrePersist                          // Called BEFORE first INSERT\n    protected void onCreate() {\n        createdAt = LocalDateTime.now();\n        updatedAt = Loc"
+    }
+  ],
+  "notes": [],
+  "profile": {}
+}
