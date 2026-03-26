@@ -5,6 +5,9 @@ Researches jobs, business trends, and handles personal assistant tasks.
 Run: python agent.py
 """
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import anthropic
 import json
 from tools.web_search   import search_web

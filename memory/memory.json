@@ -2,11 +2,6 @@
   "preferences": {},
   "history": [
     {
-      "timestamp": "2026-03-23T20:25:52.568785",
-      "user": "### Annotation → Column Mapping",
-      "agent": "Got it! Starting a new section.\n\n---\n\n```markdown\n| Concept | Hibernate (Java) | Entity Framework (.NET) |\n|---|---|---|\n| Mark a class as a table | `@Entity` | `[Table]` / inherits `DbContext` |\n| Primary key | `@Id` | `[Key]` |\n| Auto-increment | `@GeneratedValue` | `[DatabaseGenerated]` |\n| Column constraints | `@Column(nullable=false)` | `[Required]` |\n| The \"DbContext\" equivalent | `JpaRepository` | `DbContext` |\n| Save a record | `repository.save(obj)` | `context.SaveChanges()` |\n| LINQ eq"
-    },
-    {
       "timestamp": "2026-03-23T20:25:57.853050",
       "user": "```java",
       "agent": "Got it! You're starting a Java code block. Please paste the code and I'll help format or explain it in the context of your Hibernate vs Entity Framework comparison.\n\n---\n\n```markdown\n| Concept | Hibernate (Java) | Entity Framework (.NET) |\n|---|---|---|\n| Mark a class as a table | `@Entity` | `[Table]` / inherits `DbContext` |\n| Primary key | `@Id` | `[Key]` |\n| Auto-increment | `@GeneratedValue` | `[DatabaseGenerated]` |\n| Column constraints | `@Column(nullable=false)` | `[Required]` |\n| The \"D"
@@ -100,6 +95,11 @@
       "timestamp": "2026-03-23T20:27:40.855298",
       "user": "### Lifecycle Callbacks",
       "agent": "### Lifecycle Callbacks\n\nJPA provides annotations to hook into entity lifecycle events:\n\n```java\n@Entity\n@Table(name = \"products\")\npublic class Product {\n\n    // ... fields ...\n\n    @Column(nullable = false, updatable = false)\n    private LocalDateTime createdAt;\n\n    @Column(nullable = false)\n    private LocalDateTime updatedAt;\n\n    @PrePersist                          // Called BEFORE first INSERT\n    protected void onCreate() {\n        createdAt = LocalDateTime.now();\n        updatedAt = Loc"
+    },
+    {
+      "timestamp": "2026-03-26T14:24:25.472475",
+      "user": "what is trending",
+      "agent": "I'm experiencing some technical issues with the search tools at the moment. Let me share what I know about current trends based on my training data:\n\n---\n\n## 🔥 What's Trending in Tech (2024-2025)\n\n### **AI & Machine Learning**\n| Trend | Why It Matters |\n|-------|----------------|\n| **RAG (Retrieval-Augmented Generation)** | Combining LLMs with external knowledge bases for accurate, up-to-date responses |\n| **AI Agents & Agentic Workflows** | Autonomous AI systems that can plan, use tools, and co"
     }
   ],
   "notes": [],
