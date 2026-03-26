@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Assistant Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+
+    /* Markdown rendering inside agent bubbles */
+    .prose pre { background: #1e293b; border-radius: 6px; padding: 12px; overflow-x: auto; margin: 8px 0; }
+    .prose code { font-family: 'Menlo', 'Monaco', monospace; font-size: 0.85em; }
+    .prose p { margin: 4px 0; }
+    .prose ul { list-style: disc; padding-left: 20px; margin: 6px 0; }
+    .prose ol { list-style: decimal; padding-left: 20px; margin: 6px 0; }
+    .prose h1,.prose h2,.prose h3 { font-weight: 700; margin: 10px 0 4px; }
+    .prose h1 { font-size: 1.2em; }
+    .prose h2 { font-size: 1.1em; }
+    .prose h3 { font-size: 1em; }
+    .prose blockquote { border-left: 3px solid #6366f1; padding-left: 10px; color: #94a3b8; }
+    .prose strong { font-weight: 600; }
+    .prose a { color: #818cf8; text-decoration: underline; }
+
+    /* Typing indicator dots */
+    @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+    .dot { animation: bounce 1.2s infinite; display:inline-block; width:6px; height:6px; border-radius:50%; background:#6366f1; margin:0 2px; }
+    .dot:nth-child(2){animation-delay:0.2s}
+    .dot:nth-child(3){animation-delay:0.4s}
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 h-screen flex flex-col overflow-hidden">
+
+  <!-- Header -->
+  <header class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center gap-3 shrink-0">
+    <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">A</div>
+    <div>
+      <h1 class="font-semibold text-white leading-tight">Personal Assistant Agent</h1>
+      <p class="text-xs text-gray-400">Powered by Claude</p>
+    </div>
+  </header>
+
+  <!-- Main layout -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Chat area -->
+    <main class="flex flex-col flex-1 overflow-hidden">
+
+      <!-- Messages -->
+      <div id="messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        <!-- Welcome message -->
+        <div class="flex gap-3">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs shrink-0 mt-1">A</div>
+          <div class="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl prose text-sm text-gray-200">
+            <p>Hi! I'm your personal assistant. I can help you with:</p>
+            <ul>
+              <li>Job search &amp; skill gap analysis</li>
+              <li>Learning plans for any role — paste a job description to start</li>
+              <li>Market trends &amp; business research</li>
+            </ul>
+            <p>Type a message or paste a job description to get started.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input bar -->
+      <div class="border-t border-gray-800 bg-gray-900 px-4 py-3">
+        <div class="flex gap-2 max-w-4xl mx-auto">
+          <textarea
+            id="input"
+            rows="1"
+            placeholder="Message the agent… (Enter to send, Shift+Enter for new line)"
+            class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-500 resize-none focus:outline-none focus:border-indigo-500 transition-colors"
+            style="max-height: 150px; overflow-y: auto;"
+          ></textarea>
+          <button
+            id="send-btn"
+            class="bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-xl px-4 py-2.5 text-sm font-medium transition-colors shrink-0"
+          >Send</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Memory sidebar -->
+    <aside class="w-64 border-l border-gray-800 bg-gray-900 flex flex-col shrink-0 overflow-hidden">
+      <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Context</h2>
+        <button id="refresh-btn" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Refresh</button>
+      </div>
+      <div id="memory-content" class="flex-1 overflow-y-auto px-4 py-3 text-xs text-gray-400 whitespace-pre-wrap leading-relaxed">
+        Loading...
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const inputEl    = document.getElementById('input');
+    const sendBtn    = document.getElementById('send-btn');
+    const memoryEl   = document.getElementById('memory-content');
+
+    // ── Utility ──────────────────────────────────────────────────────────────
+
+    function scrollToBottom() {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function autoResize() {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 150) + 'px';
+    }
+
+    async function refreshMemory() {
+      try {
+        const res = await fetch('/api/memory');
+        const { context } = await res.json();
+        memoryEl.textContent = context;
+      } catch {
+        memoryEl.textContent = 'Could not load context.';
+      }
+    }
+
+    // ── Message rendering ─────────────────────────────────────────────────────
+
+    function appendUserMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-end';
+      div.innerHTML = `
+        <div class="bg-indigo-600 rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-xl text-sm text-white whitespace-pre-wrap">${escapeHtml(text)}</div>
+      `;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+    }
+
+    function appendToolBadge(name) {
+      const last = messagesEl.lastElementChild;
+      // Append to existing tool-row or create new one
+      let toolRow = last?.dataset?.toolRow ? last : null;
+      if (!toolRow) {
+        toolRow = document.createElement('div');
+        toolRow.dataset.toolRow = '1';
+        toolRow.className = 'flex gap-2 flex-wrap pl-10';
+        messagesEl.appendChild(toolRow);
+      }
+      const badge = document.createElement('span');
+      badge.className = 'inline-flex items-center gap-1 bg-gray-800 border border-gray-700 text-gray-400 rounded-full px-2.5 py-1 text-xs animate-pulse';
+      badge.dataset.tool = name;
+      badge.innerHTML = `<span>🔧</span> ${escapeHtml(name)}`;
+      toolRow.appendChild(badge);
+      scrollToBottom();
+      return badge;
+    }
+
+    function markToolDone(name) {
+      const badge = messagesEl.querySelector(`[data-tool="${name}"]`);
+      if (badge) {
+        badge.classList.remove('animate-pulse', 'text-gray-400', 'border-gray-700');
+        badge.classList.add('text-green-400', 'border-green-800');
+        badge.innerHTML = `<span>✓</span> ${escapeHtml(name)}`;
+      }
+    }
+
+    function appendTypingIndicator() {
+      const div = document.createElement('div');
+      div.id = 'typing';
+      div.className = 'flex gap-3';
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs shrink-0 mt-1">A</div>
+        <div class="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      `;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    function removeTypingIndicator() {
+      document.getElementById('typing')?.remove();
+    }
+
+    function appendAgentMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'flex gap-3';
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs shrink-0 mt-1">A</div>
+        <div class="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl prose text-sm text-gray-200"></div>
+      `;
+      div.querySelector('.prose').innerHTML = marked.parse(text);
+      messagesEl.appendChild(div);
+      scrollToBottom();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Send message ──────────────────────────────────────────────────────────
+
+    async function sendMessage() {
+      const message = inputEl.value.trim();
+      if (!message) return;
+
+      inputEl.value = '';
+      autoResize();
+      sendBtn.disabled = true;
+
+      appendUserMessage(message);
+      const typingEl = appendTypingIndicator();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let typingRemoved = false;
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            let event;
+            try { event = JSON.parse(line.slice(6)); } catch { continue; }
+
+            if (event.type === 'tool') {
+              if (!typingRemoved) { removeTypingIndicator(); typingRemoved = true; }
+              appendToolBadge(event.name);
+            } else if (event.type === 'result') {
+              markToolDone(event.name);
+            } else if (event.type === 'text') {
+              if (!typingRemoved) { removeTypingIndicator(); typingRemoved = true; }
+              appendAgentMessage(event.content);
+            } else if (event.type === 'done') {
+              refreshMemory();
+            }
+          }
+        }
+
+        if (!typingRemoved) removeTypingIndicator();
+
+      } catch (err) {
+        removeTypingIndicator();
+        appendAgentMessage(`**Error:** ${err.message}`);
+      }
+
+      sendBtn.disabled = false;
+      inputEl.focus();
+    }
+
+    // ── Event listeners ───────────────────────────────────────────────────────
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    inputEl.addEventListener('input', autoResize);
+
+    document.getElementById('refresh-btn').addEventListener('click', refreshMemory);
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    refreshMemory();
+  </script>
+</body>
+</html>

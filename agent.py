@@ -407,6 +407,95 @@ When the user asks to learn, study, or practice any topic:
         # Feed results back to Claude and loop
         messages.append({"role": "user", "content": tool_results})
 
+# ── Streaming agent loop (for web UI) ─────────────────────────────────────────
+
+def stream_agent(user_message: str, memory: Memory):
+    """
+    Generator version of run_agent for Server-Sent Events streaming.
+    Yields SSE-formatted strings so the web UI can show tool calls in real-time.
+
+    Event types:
+      {"type": "tool",   "name": "...", "input": {...}}   — tool starting
+      {"type": "result", "name": "..."}                   — tool finished
+      {"type": "text",   "content": "..."}                — final response
+      {"type": "done"}                                     — stream complete
+    """
+    client = anthropic.Anthropic()
+    memory_context = memory.get_context()
+
+    system_prompt = f"""You are a proactive personal assistant agent. You help with:
+- Job research (finding roles, filtering by salary/location/remote, saving lists)
+- Business trend analysis (spotting opportunities, emerging niches)
+- Skill development (gap analysis, learning resources, in-demand skill research)
+- Personal assistant tasks (reminders, notes, research, summaries)
+
+You have tools available. When given a task, use them proactively — don't just answer
+from memory. Search, verify, and save results when useful.
+
+When you find jobs or trends the user would care about, save them to a file automatically.
+When you find something urgent or exceptional, send a notification.
+
+Always be specific: include salaries, company names, dates, and links when available.
+
+When analyzing skill gaps or recommending learning resources, use the user's resume below
+as the baseline for their current skills — don't ask them to list skills unless they want
+to override the resume.
+
+## User's Resume:
+{RESUME_TEXT}
+
+## What I know about this user:
+{memory_context}
+
+## Teaching Mode
+You are also a technical mentor. You adapt to whatever job the user is targeting
+(active job target shown above; defaults to Wells Fargo AI Engineer if none set).
+
+When the user pastes a job description → call parse_job_description immediately.
+When the user asks to learn, study, or practice any topic:
+1. Call generate_lesson (auto-uses active job context).
+2. After the lesson, offer to quiz them via quiz_me.
+3. After a quiz, call update_progress to record topic + score.
+4. For a study plan, call get_study_plan (run analyze_skill_gap first if helpful).
+"""
+
+    messages = memory.get_recent_messages() + [{"role": "user", "content": user_message}]
+
+    while True:
+        response = client.messages.create(
+            model="claude-opus-4-5",
+            max_tokens=8096,
+            system=system_prompt,
+            tools=TOOLS,
+            messages=messages
+        )
+
+        messages.append({"role": "assistant", "content": response.content})
+        tool_calls = [block for block in response.content if block.type == "tool_use"]
+
+        if not tool_calls:
+            final_text = " ".join(
+                block.text for block in response.content if hasattr(block, "text")
+            )
+            memory.add_exchange(user_message, final_text)
+            yield f"data: {json.dumps({'type': 'text', 'content': final_text})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return
+
+        tool_results = []
+        for tool_call in tool_calls:
+            yield f"data: {json.dumps({'type': 'tool', 'name': tool_call.name, 'input': tool_call.input})}\n\n"
+            result = run_tool(tool_call.name, tool_call.input)
+            yield f"data: {json.dumps({'type': 'result', 'name': tool_call.name})}\n\n"
+            tool_results.append({
+                "type": "tool_result",
+                "tool_use_id": tool_call.id,
+                "content": result
+            })
+
+        messages.append({"role": "user", "content": tool_results})
+
+
 # ── Interactive CLI ────────────────────────────────────────────────────────────
 
 def main():
