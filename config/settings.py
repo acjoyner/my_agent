@@ -33,6 +33,30 @@ BUSINESS_INTEREST_AREAS = [
 # Set to True to enable desktop notifications
 DESKTOP_NOTIFICATIONS = True
 
+# Email via Gmail (requires Google OAuth — run: python tools/google_tools.py --auth)
+EMAIL_NOTIFICATIONS = True
+
+# Telegram (requires TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID in .env)
+TELEGRAM_NOTIFICATIONS = True
+
+# ── Ollama fallback ───────────────────────────────────────────────────────────
+# Used automatically when Anthropic API usage limit is hit.
+# Requires Ollama running locally: https://ollama.com
+OLLAMA_FALLBACK        = True
+OLLAMA_BASE_URL        = "http://localhost:11434/v1"
+OLLAMA_MODEL           = "llama3.2:latest"   # must support tool calling
+OLLAMA_FALLBACK_MODELS = [                   # tried in order if primary fails
+    "llama3.2:latest",
+    "gemma3:4b",
+    "qwen3-coder:30b",
+]
+
+# ── Google Workspace ──────────────────────────────────────────────────────────
+# Path to your OAuth credentials file downloaded from Google Cloud Console.
+# After downloading, save it as credentials.json in the project root.
+GOOGLE_CREDENTIALS_FILE = "credentials.json"   # relative to project root
+GOOGLE_TOKEN_FILE       = "token.json"          # auto-created after first auth
+
 # ── Scheduled scans (used by scheduler.py) ───────────────────────────────────
 # How often to auto-run scans (in hours)
 JOB_SCAN_INTERVAL_HOURS   = 24

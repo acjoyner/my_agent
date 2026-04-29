@@ -13,7 +13,7 @@ Uses a simple JSON file — no database required.
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+# from typing import Optional
 
 MEMORY_FILE = Path(__file__).parent.parent / "memory" / "memory.json"
 MAX_HISTORY = 20   # Keep last 20 exchanges in context

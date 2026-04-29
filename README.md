@@ -78,8 +78,21 @@ Open `config/settings.py` and fill in:
 - Business areas you're watching
 
 ### 6. Run it
+
+**Web UI (recommended):**
+```bash
+python -m uvicorn app:app --reload --port 8000
+```
+Then open http://localhost:8000 in your browser.
+
+**Terminal only:**
 ```bash
 python agent.py
+```
+
+**Terminal with voice:**
+```bash
+python agent.py --voice
 ```
 
 ---

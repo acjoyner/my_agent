@@ -50,7 +50,7 @@ def search_trends(topic: str, timeframe: str = "month") -> dict:
     )
 
     text = " ".join(
-        block.text for block in response.content if hasattr(block, "text")
+        getattr(block, "text", "") for block in response.content if hasattr(block, "text")
     ).strip()
 
     try:
@@ -110,7 +110,7 @@ def search_business_ideas(area: str, budget: str = "low") -> dict:
     )
 
     text = " ".join(
-        block.text for block in response.content if hasattr(block, "text")
+        getattr(block, "text", "") for block in response.content if hasattr(block, "text")
     ).strip()
 
     try:
