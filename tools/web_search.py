@@ -5,7 +5,6 @@ Uses the Anthropic API's built-in web search via a sub-call to Claude.
 No extra API keys needed.
 """
 
-import anthropic
 import json
 
 
@@ -14,7 +13,6 @@ def search_web(query: str, num_results: int = 5) -> dict:
     Search the web using Claude's built-in web search tool.
     Returns a dict with 'query', 'summary', and 'results' list.
     """
-    client = anthropic.Anthropic()
 
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",

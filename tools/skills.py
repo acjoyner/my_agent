@@ -4,7 +4,6 @@ Job skills tools
 Skill gap analysis, learning resources, and in-demand skill research.
 """
 
-import anthropic
 import json
 
 
@@ -13,7 +12,6 @@ def analyze_skill_gap(job_title: str, current_skills: str) -> dict:
     Compare current skills against what's required for a job title.
     Returns matched skills, missing skills, and priority actions.
     """
-    client = anthropic.Anthropic()
 
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
@@ -62,7 +60,6 @@ def find_learning_resources(skill: str, level: str = "intermediate") -> dict:
     """
     Find courses, tutorials, certifications, and resources for learning a skill.
     """
-    client = anthropic.Anthropic()
 
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
@@ -115,7 +112,6 @@ def get_in_demand_skills(job_title: str) -> dict:
     """
     Find the most in-demand and trending skills for a job title right now.
     """
-    client = anthropic.Anthropic()
 
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",

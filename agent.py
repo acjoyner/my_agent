@@ -1,3 +1,69 @@
+cat tools/skills.py
+cat tools/skills.py
+cat app.py
+cat << 'EOF' > migrate.py
+import os
+import re
+
+def migrate_agent_py():
+    with open('agent.py', 'r') as f:
+        content = f.read()
+    
+    
+    # Update stream_agent_ollama to use gemma4 model
+    # Look for ollama.chat call or similar
+    content = re.sub(r'(model\s*=\s*)[^,)]+', r'\1"gemma4"', content)
+    
+    # Replace stream_agent logic
+    stream_agent_pattern = r'(def stream_agent\(user_message: str, memory: Memory\) -> str:).*?(?=\ndef|$)'
+    new_body = r'\1\n    return stream_agent_ollama(user_message, memory)'
+    content = re.sub(stream_agent_pattern, new_body, content, flags=re.DOTALL)
+    
+    with open('agent.py', 'w') as f:
+        f.write(content)
+
+def migrate_tools():
+    tools = ['skills.py', 'teach.py', 'job_search.py', 'trends.py', 'web_search.py']
+    for tool in tools:
+        path = os.path.join('tools', tool)
+        if os.path.exists(path):
+            with open(path, 'r') as f:
+                lines = f.readlines()
+            with open(path, 'w') as f:
+                for line in lines:
+                        continue
+                    f.write(line)
+
+def migrate_requirements():
+    with open('requirements.txt', 'r') as f:
+        lines = f.readlines()
+    with open('requirements.txt', 'w') as f:
+        for line in lines:
+            if 'anthropic' in line:
+                f.write('ollama\n')
+            else:
+                f.write(line)
+
+def migrate_app_py():
+    with open('app.py', 'r') as f:
+        content = f.read()
+    # Ensure agent calls point to ollama implementation
+    # This assumes we want to change any call that looks like an agent call
+    # But since we updated stream_agent in agent.py to call ollama, maybe no change needed in app.py
+    # Let's just double check if there are specific anthropic mentions
+    with open('app.py', 'w') as f:
+        f.write(content)
+
+migrate_agent_py()
+migrate_tools()
+migrate_requirements()
+migrate_app_py()
+EOF
+python3 migrate.py
+cat requirements.txt
+cat requirements.txt
+cat requirements.txt; grep "stream_agent" agent.py; ls tools/
+cat requirements.txt; grep -C 5 "stream_agent" agent.py; grep "anthropic" tools/skills.py
 """
 Personal Assistant Agent
 ========================
@@ -8,7 +74,7 @@ Run: python agent.py
 from dotenv import load_dotenv
 load_dotenv()
 
-import anthropic
+
 import json
 from tools.web_search   import search_web
 from tools.job_search   import search_jobs, get_job_details
@@ -652,7 +718,7 @@ When the user asks to learn, study, or practice any topic:
     # Agentic loop — keeps going until Claude stops calling tools
     while True:
         response = client.messages.create(
-            model="claude-opus-4-5",
+            model="gemma4",
             max_tokens=8096,
             system=system_prompt,
             tools=TOOLS,
@@ -886,7 +952,7 @@ When the user asks to learn, study, or practice any topic:
 
     while True:
         response = client.messages.create(
-            model="claude-opus-4-5",
+            model="gemma4",
             max_tokens=8096,
             system=system_prompt,
             tools=TOOLS,

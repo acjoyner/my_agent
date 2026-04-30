@@ -5,7 +5,6 @@ Searches job boards via Claude's web search (no extra keys needed).
 For production use, swap search_jobs() internals with Indeed/LinkedIn APIs.
 """
 
-import anthropic
 import json
 import re
 
@@ -21,7 +20,6 @@ def search_jobs(
     Search for job listings matching the given criteria.
     Returns a structured list of jobs.
     """
-    client = anthropic.Anthropic()
 
     # Build a natural-language search query
     parts = [f'"{title}" jobs']

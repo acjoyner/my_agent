@@ -5,7 +5,6 @@ Interactive lessons, quizzes, progress tracking, and study plans.
 Adapts to any job description stored in memory (defaults to WF AI Engineer role).
 """
 
-import anthropic
 import json
 from datetime import datetime
 from memory.memory import MEMORY_FILE
@@ -69,7 +68,6 @@ def parse_job_description(jd_text: str) -> dict:
     Parse any job description and save it as the active learning target in memory.
     Call this whenever the user pastes a new job description.
     """
-    client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=800,
@@ -105,7 +103,6 @@ def generate_lesson(topic: str, skill_area: str, level: str = "intermediate") ->
     Automatically uses the active job target (or WF defaults) for context.
     """
     job = _load_job_context()
-    client = anthropic.Anthropic()
 
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
@@ -139,7 +136,6 @@ def quiz_me(topic: str, skill_area: str, num_questions: int = 3) -> dict:
     Uses active job context for domain framing.
     """
     job = _load_job_context()
-    client = anthropic.Anthropic()
 
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
@@ -203,7 +199,6 @@ def get_study_plan(weeks_available: int = 8, target_weak_areas: str = "") -> dic
     skills_list = "\n".join(f"- {s}" for s in job["required_skills"])
     weak = f"Prioritize: {target_weak_areas}" if target_weak_areas else "Infer gaps from resume vs required skills."
 
-    client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=3000,

@@ -4,7 +4,6 @@ Trends & business ideas tool
 Uses Claude's web search to find industry trends and business opportunities.
 """
 
-import anthropic
 import json
 
 
@@ -13,7 +12,6 @@ def search_trends(topic: str, timeframe: str = "month") -> dict:
     Search for current trends in a topic.
     Returns a structured list of trends with growth signals.
     """
-    client = anthropic.Anthropic()
 
     timeframe_label = {
         "week":  "past 7 days",
@@ -68,7 +66,6 @@ def search_business_ideas(area: str, budget: str = "low") -> dict:
     Find underserved niches and business opportunities in a given area.
     Returns pain points, gaps, and actionable ideas.
     """
-    client = anthropic.Anthropic()
 
     budget_desc = {
         "low":    "under $5,000 startup cost",
