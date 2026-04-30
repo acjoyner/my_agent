@@ -1,7 +1,5 @@
 """
 Web search tool
-===============
-Uses the Anthropic API's built-in web search via a sub-call to Claude.
 No extra API keys needed.
 """
 

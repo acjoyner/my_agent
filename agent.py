@@ -16,7 +16,7 @@ def migrate_agent_py():
     
     # Replace stream_agent logic
     stream_agent_pattern = r'(def stream_agent\(user_message: str, memory: Memory\) -> str:).*?(?=\ndef|$)'
-    new_body = r'\1\n    return stream_agent_ollama(user_message, memory)'
+    new_body = r'\1\n    return stream_agent_ollama(user_message, memory, model="gemma4")'
     content = re.sub(stream_agent_pattern, new_body, content, flags=re.DOTALL)
     
     with open('agent.py', 'w') as f:
@@ -66,7 +66,6 @@ cat requirements.txt; grep "stream_agent" agent.py; ls tools/
 cat requirements.txt; grep -C 5 "stream_agent" agent.py; grep "anthropic" tools/skills.py
 """
 Personal Assistant Agent
-========================
 Researches jobs, business trends, and handles personal assistant tasks.
 Run: python agent.py
 """
@@ -663,6 +662,7 @@ def run_tool(name: str, inputs: dict, memory=None) -> str:
 # ── Agent loop ─────────────────────────────────────────────────────────────────
 
 def run_agent(user_message: str, memory: Memory) -> str:
+    return stream_agent_ollama(user_message, memory, model="gemma4")
     """
     The core agent loop.
     1. Build messages with memory context
@@ -670,7 +670,6 @@ def run_agent(user_message: str, memory: Memory) -> str:
     3. If Claude wants to use a tool → run it, add result, loop
     4. Return final text response
     """
-    client = anthropic.Anthropic()
 
     # Pull relevant memory into the system prompt
     memory_context = memory.get_context()
@@ -907,7 +906,6 @@ def stream_agent(user_message: str, memory: Memory):
       {"type": "text",   "content": "..."}                — final response
       {"type": "done"}                                     — stream complete
     """
-    client = anthropic.Anthropic()
     memory_context = memory.get_context()
 
     system_prompt = f"""You are a proactive personal assistant agent. You help with:

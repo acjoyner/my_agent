@@ -1,6 +1,5 @@
 """
 Job skills tools
-================
 Skill gap analysis, learning resources, and in-demand skill research.
 """
 

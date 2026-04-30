@@ -1,6 +1,5 @@
 """
 Teaching tools for job role preparation
-========================================
 Interactive lessons, quizzes, progress tracking, and study plans.
 Adapts to any job description stored in memory (defaults to WF AI Engineer role).
 """

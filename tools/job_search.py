@@ -1,6 +1,5 @@
 """
 Job search tool
-===============
 Searches job boards via Claude's web search (no extra keys needed).
 For production use, swap search_jobs() internals with Indeed/LinkedIn APIs.
 """

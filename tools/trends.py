@@ -1,6 +1,5 @@
 """
 Trends & business ideas tool
-=============================
 Uses Claude's web search to find industry trends and business opportunities.
 """
 
