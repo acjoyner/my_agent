@@ -4,6 +4,7 @@ Skill gap analysis, learning resources, and in-demand skill research.
 """
 
 import json
+from tools.client import client
 
 
 def analyze_skill_gap(job_title: str, current_skills: str) -> dict:

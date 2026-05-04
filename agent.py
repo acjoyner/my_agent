@@ -7,108 +7,170 @@ Run: python agent.py
 
 import json
 import os
+import base64
+from openai import OpenAI
 from dotenv import load_dotenv
-from config.settings import RESUME_TEXT, OLLAMA_BASE_URL, OLLAMA_MODEL, OLLAMA_FALLBACK_MODELS
+from config.settings import RESUME_TEXT, OLLAMA_BASE_URL, OLLAMA_MODEL
 from memory.memory import Memory
-
-# Tool Imports
-from tools.web_search import search_web
-from tools.job_search import search_jobs, get_job_details
-from tools.trends import search_trends, search_business_ideas
-from tools.skills import analyze_skill_gap, find_learning_resources, get_in_demand_skills
-from tools.teach import generate_lesson, quiz_me, update_progress, get_study_plan, parse_job_description
-from tools.file_tools import save_to_file, read_file, list_saved_files
-from tools.notify import send_notification, send_email, send_telegram
-from tools.google_tools import (
-    sheets_create, sheets_read, sheets_write, sheets_append,
-    docs_create, docs_read, drive_list, drive_upload,
-    gmail_read_inbox, gmail_get_message, gmail_search, gmail_mark_read,
-    slides_create, slides_read, slides_add_slide
-)
+from skills import load_skills
 
 load_dotenv()
 
-# ── Tool Registry ──────────────────────────────────────────────────────────────
+client = OpenAI(base_url=OLLAMA_BASE_URL, api_key="ollama")
 
-TOOLS = [
-    {"name": "search_web", "description": "Search the web for any topic.", "input_schema": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}},
-    {"name": "search_jobs", "description": "Search for job listings.", "input_schema": {"type": "object", "properties": {"title": {"type": "string"}, "location": {"type": "string"}}, "required": ["title"]}},
-    {"name": "save_to_file", "description": "Save content to a file.", "input_schema": {"type": "object", "properties": {"filename": {"type": "string"}, "content": {"type": "string"}}, "required": ["filename", "content"]}},
-    {"name": "analyze_skill_gap", "description": "Compare skills against a target job.", "input_schema": {"type": "object", "properties": {"job_title": {"type": "string"}, "current_skills": {"type": "string"}}, "required": ["job_title", "current_skills"]}}
-    # Note: Additional tools can be added here following the same schema
-]
+# ── Skill Management ──────────────────────────────────────────────────────────
+
+SKILLS = load_skills()
+
+def get_all_tools():
+    """Aggregates tool schemas from all loaded skills."""
+    all_tools = []
+    for skill in SKILLS:
+        all_tools.extend(skill.get_tools())
+    return all_tools
 
 def run_tool(name: str, inputs: dict, memory=None) -> str:
-    dispatch = {
-        "search_web": lambda i: search_web(i["query"]),
-        "search_jobs": lambda i: search_jobs(i["title"], location=i.get("location")),
-        "analyze_skill_gap": lambda i: analyze_skill_gap(i["job_title"], i["current_skills"]),
-        "save_to_file": lambda i: save_to_file(i["filename"], i["content"])
-    }
-    if name not in dispatch: return f"Unknown tool: {name}"
-    try:
-        result = dispatch[name](inputs)
-        return json.dumps(result) if isinstance(result, (dict, list)) else str(result)
-    except Exception as e: return f"Tool error: {e}"
+    """Dispatches tool execution to the appropriate skill module."""
+    for skill in SKILLS:
+        result = skill.handle_tool(name, inputs, memory)
+        if result is not None:
+            return result
+    return f"Unknown tool: {name}"
+
+def get_skills_context():
+    """Aggregates system prompts from all loaded skills."""
+    context = ""
+    for skill in SKILLS:
+        if hasattr(skill, "get_system_prompt"):
+            context += f"\n- {skill.get_system_prompt()}"
+    return context
 
 # ── Ollama Agent Logic ────────────────────────────────────────────────────────
 
 def _tools_to_ollama(tools: list) -> list:
     return [{"type": "function", "function": {"name": t["name"], "description": t["description"], "parameters": t.get("input_schema", {})}} for t in tools]
 
-def stream_agent_ollama(user_message: str, memory: Memory, model: str = "gemma4"):
-    from openai import OpenAI
-    client = OpenAI(base_url=OLLAMA_BASE_URL, api_key="ollama")
+def _encode_image(image_path):
+    """Encodes a local image file to base64."""
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+def stream_agent_ollama(user_message: str, memory: Memory):
+    global client
+    # 1. ROUTER: Detect if we need 'Eyes' (Vision) or 'Brain' (Tools)
+    vision_keywords = ['.jpg', '.png', '.jpeg', '.webp', 'photo', 'picture', 'image', 'look at']
+    is_vision_request = any(word in user_message.lower() for word in vision_keywords)
     
-    system_prompt = f"You are Anthony's AI Assistant. Use tools for job searches and research.\n\nResume Context:\n{RESUME_TEXT}"
-    
+    # Switch models: llava:latest for images (better for ID cards), gemma4 for logic/tools
+    selected_model = "llava:latest" if is_vision_request else "gemma4"
+
+    system_prompt = (
+        f"You are Anthony's Assistant. Context:\n{RESUME_TEXT}\n"
+        f"\nUser Context:\n{memory.get_context()}"
+        f"\nActive Skills:{get_skills_context()}"
+    )
     messages = [{"role": "system", "content": system_prompt}]
+    
+    # Add history from memory
     for msg in memory.get_recent_messages():
-        messages.append(msg)
-    messages.append({"role": "user", "content": user_message})
+        if msg.get("content"):
+            messages.append(msg)
+    
+    # 2. Add Local File Context for the Vision Model
+    user_content = []
+    if is_vision_request:
+        uploads_dir = "uploads"
+        if os.path.exists(uploads_dir):
+            image_extensions = ('.png', '.jpg', '.jpeg', '.webp')
+            files = [os.path.join(uploads_dir, f) for f in os.listdir(uploads_dir) if f.lower().endswith(image_extensions)]
+            if files:
+                latest_file = max(files, key=os.path.getctime)
+                try:
+                    base64_image = _encode_image(latest_file)
+                    user_content.append({"type": "text", "text": f"[Analyzing file: {latest_file}] {user_message}"})
+                    user_content.append({
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}
+                    })
+                except Exception as e:
+                    user_content = f"[Error loading image {latest_file}: {e}] {user_message}"
+            else:
+                user_content = user_message
+        else:
+            user_content = user_message
+    else:
+        user_content = user_message
+
+    messages.append({"role": "user", "content": user_content})
+
+    # 3. TOOL GUARD: Only send tools to models that support them (Gemma 4)
+    tool_params = {}
+    if selected_model == "gemma4":
+        tool_params = {
+            "tools": _tools_to_ollama(get_all_tools()),
+            "tool_choice": "auto"
+        }
 
     try:
+        # 4. Call Ollama
         response = client.chat.completions.create(
-            model=model,
+            model=selected_model,
             messages=messages,
-            tools=_tools_to_ollama(TOOLS),
-            tool_choice="auto"
+            **tool_params
         )
-        
+
         msg = response.choices[0].message
-        if msg.tool_calls:
+        
+        # 5. Handle Tool/Text logic
+        if hasattr(msg, 'tool_calls') and msg.tool_calls:
             for tool_call in msg.tool_calls:
                 name = tool_call.function.name
                 inputs = json.loads(tool_call.function.arguments)
                 yield f"data: {json.dumps({'type': 'tool', 'name': name, 'input': inputs})}\n\n"
+                
                 result = run_tool(name, inputs, memory)
+                
+                # Try to extract display_text if available
+                display_content = result
+                try:
+                    res_json = json.loads(result)
+                    if isinstance(res_json, dict) and "display_text" in res_json:
+                        display_content = res_json["display_text"]
+                except: pass
+
                 yield f"data: {json.dumps({'type': 'result', 'name': name})}\n\n"
-            
-            # Final thought after tool use
-            yield f"data: {json.dumps({'type': 'text', 'content': 'Tools executed. Processing results...'})}\n\n"
+                yield f"data: {json.dumps({'type': 'text', 'content': display_content})}\n\n"
         else:
             yield f"data: {json.dumps({'type': 'text', 'content': msg.content})}\n\n"
-            
+
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        
     except Exception as e:
         yield f"data: {json.dumps({'type': 'text', 'content': f'Error: {str(e)}'})}\n\n"
 
 def run_agent(user_message: str, memory: Memory) -> str:
-    # Synchronous wrapper for CLI
-    gen = stream_agent_ollama(user_message, memory)
-    final_text = ""
+    gen, final_text = stream_agent_ollama(user_message, memory), ""
     for line in gen:
         if "data: " in line:
             data = json.loads(line.replace("data: ", ""))
             if data['type'] == 'text': final_text += data['content']
     return final_text
 
-def stream_agent(user_message: str, memory: Memory):
+def stream_agent(user_message: str, memory: Memory): 
     return stream_agent_ollama(user_message, memory)
 
 if __name__ == "__main__":
     memory = Memory()
     while True:
-        u_in = input("You: ")
-        if u_in.lower() in ['exit', 'quit']: break
-        print(f"Agent: {run_agent(u_in, memory)}")
+        try:
+            u_in = input("You: ")
+            if u_in.lower() in ['exit', 'quit']: break
+            print("Agent: ", end="", flush=True)
+            for chunk in stream_agent(u_in, memory):
+                if "data: " in chunk:
+                    data = json.loads(chunk.replace("data: ", ""))
+                    if data['type'] == 'text':
+                        print(data['content'], end="", flush=True)
+            print("\n")
+        except KeyboardInterrupt:
+            break

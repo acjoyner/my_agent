@@ -5,6 +5,7 @@ Adapts to any job description stored in memory (defaults to WF AI Engineer role)
 """
 
 import json
+from tools.client import client
 from datetime import datetime
 from memory.memory import MEMORY_FILE
 from config.settings import RESUME_TEXT

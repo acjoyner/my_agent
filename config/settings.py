@@ -44,10 +44,10 @@ TELEGRAM_NOTIFICATIONS = True
 # Requires Ollama running locally: https://ollama.com
 OLLAMA_FALLBACK        = True
 OLLAMA_BASE_URL        = "http://localhost:11434/v1"
-OLLAMA_MODEL           = "llama3.2:latest"   # must support tool calling
+OLLAMA_MODEL           = "gemma4"            # must support tool calling
 OLLAMA_FALLBACK_MODELS = [                   # tried in order if primary fails
+    "gemma4",
     "llama3.2:latest",
-    "gemma3:4b",
     "qwen3-coder:30b",
 ]
 

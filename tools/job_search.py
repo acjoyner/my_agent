@@ -6,6 +6,7 @@ For production use, swap search_jobs() internals with Indeed/LinkedIn APIs.
 
 import json
 import re
+from tools.client import client
 
 
 def search_jobs(

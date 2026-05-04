@@ -11,84 +11,64 @@ Directory layout:
   output/             — agent-generated, uncategorized
   knowledge/          — user-provided reference docs (learning notes, project docs, etc.)
 """
-
-import json
+import os
+import shutil
 from datetime import datetime
-from pathlib import Path
 
-OUTPUT_DIR   = Path(__file__).parent.parent / "output"
-KNOWLEDGE_DIR = Path(__file__).parent.parent / "knowledge"
-OUTPUT_DIR.mkdir(exist_ok=True)
-KNOWLEDGE_DIR.mkdir(exist_ok=True)
+def scan_directory(path):
+    """Returns metadata for images in a directory."""
+    if not os.path.exists(path):
+        return {"error": f"Path {path} not found."}
+    
+    files_found = []
+    valid_exts = ('.png', '.jpg', '.jpeg', '.gif', '.heic', '.webp')
+    
+    for root, _, files in os.walk(path):
+        for file in files:
+            if file.lower().endswith(valid_exts):
+                full_path = os.path.join(root, file)
+                stats = os.stat(full_path)
+                files_found.append({
+                    "name": file,
+                    "path": full_path,
+                    "created": datetime.fromtimestamp(stats.st_ctime).strftime('%Y-%m-%d'),
+                    "size_kb": round(stats.st_size / 1024, 2)
+                })
+    return {"files": files_found}
 
-# Pre-create standard category folders under output/
-for _folder in ("jobs", "trends", "learning", "skills"):
-    (OUTPUT_DIR / _folder).mkdir(exist_ok=True)
+def move_file(source, destination_folder):
+    """Moves a file and ensures the destination exists."""
+    try:
+        os.makedirs(destination_folder, exist_ok=True)
+        shutil.move(source, os.path.join(destination_folder, os.path.basename(source)))
+        return {"success": True, "moved_to": destination_folder}
+    except Exception as e:
+        return {"error": str(e)}
 
+def save_to_file(filename, content, folder="output"):
+    """Saves text content to a specified file/folder."""
+    try:
+        os.makedirs(folder, exist_ok=True)
+        file_path = os.path.join(folder, filename)
+        with open(file_path, "w") as f:
+            f.write(content)
+        return f"Saved to {file_path}"
+    except Exception as e:
+        return f"Save failed: {e}"
 
-def save_to_file(filename: str, content: str, format: str = "md", folder: str = "") -> dict:
-    """Save content to a file in the output directory, optionally in a subfolder."""
-    safe_name = "".join(c for c in filename if c.isalnum() or c in "-_ ").strip()
-    safe_name = safe_name.replace(" ", "_")
+def read_file(filename, folder="output"):
+    """Reads content from a file."""
+    try:
+        file_path = os.path.join(folder, filename)
+        with open(file_path, "r") as f:
+            return f.read()
+    except Exception as e:
+        return f"Read failed: {e}"
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    full_name = f"{safe_name}_{timestamp}.{format}"
-
-    if folder:
-        safe_folder = "".join(c for c in folder if c.isalnum() or c in "-_").strip()
-        target_dir = OUTPUT_DIR / safe_folder
-        target_dir.mkdir(exist_ok=True)
-    else:
-        target_dir = OUTPUT_DIR
-
-    path = target_dir / full_name
-    path.write_text(content, encoding="utf-8")
-
-    return {
-        "saved": True,
-        "filename": full_name,
-        "folder": folder or "(root)",
-        "path": str(path),
-        "size_bytes": len(content.encode("utf-8"))
-    }
-
-
-def read_file(filename: str) -> str:
-    """Read a file from output/ or knowledge/."""
-    for base in (OUTPUT_DIR, KNOWLEDGE_DIR):
-        path = base / filename
-        if path.exists():
-            return path.read_text(encoding="utf-8")
-        matches = list(base.rglob(f"*{filename}*"))
-        if matches:
-            return matches[0].read_text(encoding="utf-8")
-
-    return f"File not found: {filename}. Use list_saved_files() to see available files."
-
-
-def list_saved_files() -> dict:
-    """List all files in output/ and knowledge/, grouped by folder."""
-    folders = {}
-
-    for base, label in ((OUTPUT_DIR, "output"), (KNOWLEDGE_DIR, "knowledge")):
-        for path in sorted(base.rglob("*")):
-            if not path.is_file():
-                continue
-            if path.parent == base:
-                folder_name = label
-            else:
-                folder_name = f"{label}/{path.parent.name}"
-            stat = path.stat()
-            folders.setdefault(folder_name, []).append({
-                "filename": path.name,
-                "size": f"{stat.st_size / 1024:.1f} KB",
-                "modified": datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M")
-            })
-
-    total = sum(len(v) for v in folders.values())
-    return {
-        "output_directory": str(OUTPUT_DIR),
-        "knowledge_directory": str(KNOWLEDGE_DIR),
-        "total_files": total,
-        "folders": folders
-    }
+def list_saved_files(folder="output"):
+    """Lists files in the output folder."""
+    try:
+        if not os.path.exists(folder): return []
+        return os.listdir(folder)
+    except Exception:
+        return []

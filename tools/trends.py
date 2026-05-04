@@ -4,6 +4,7 @@ Uses Claude's web search to find industry trends and business opportunities.
 """
 
 import json
+from tools.client import client
 
 
 def search_trends(topic: str, timeframe: str = "month") -> dict:

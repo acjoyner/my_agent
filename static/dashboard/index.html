@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Assistant Dashboard</title>
+    <link rel="stylesheet" href="/dashboard/static/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="title-group">
+                <h1>Personal Assistant</h1>
+                <p>System Overview & Activity Feed</p>
+            </div>
+            <div class="status-indicator">
+                <span class="dot"></span>
+                <span>System Online</span>
+            </div>
+        </header>
+
+        <main id="dashboard-grid">
+            <!-- System Status Widget (T006) -->
+            <section class="widget" id="status-widget">
+                <div class="widget-header">
+                    <span class="widget-title">Agent Status</span>
+                </div>
+                <div class="widget-content">
+                    <p style="font-size: 1.25rem; font-weight: 600;">Operational</p>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">Uptime: 100%</p>
+                </div>
+            </section>
+
+            <!-- Recent Jobs Widget (T007 Placeholder) -->
+            <section class="widget" id="jobs-widget">
+                <div class="widget-header">
+                    <span class="widget-title">Recent Jobs</span>
+                    <button id="refresh-jobs" style="background: none; border: none; color: var(--primary-indigo); cursor: pointer; font-size: 0.75rem; font-weight: 600;">Refresh</button>
+                </div>
+                <div id="jobs-container" class="widget-content">
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Loading recent listings...</p>
+                </div>
+            </section>
+
+            <!-- Memory Widget -->
+            <section class="widget">
+                <div class="widget-header">
+                    <span class="widget-title">Memory Context</span>
+                </div>
+                <div class="widget-content">
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Last indexed: Just now</p>
+                </div>
+            </section>
+
+            <!-- Skill Gap Widget -->
+            <section class="widget">
+                <div class="widget-header">
+                    <span class="widget-title">Trending Skills</span>
+                </div>
+                <div id="analytics-container" class="widget-content">
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Analyzing skill trends...</p>
+                </div>
+            </section>
+
+            <!-- Quick Start Widget -->
+            <section class="widget">
+                <div class="widget-header">
+                    <span class="widget-title">Quick Start Guide</span>
+                </div>
+                <div class="widget-content">
+                    <ul style="color: var(--text-muted); font-size: 0.8125rem; padding-left: 1rem; line-height: 1.6;">
+                        <li><strong>Track Skills:</strong> Ask the agent to "Analyze skill gap for [Job Title]".</li>
+                        <li><strong>Find Jobs:</strong> Ask "Search for [Role] in [City]".</li>
+                        <li><strong>Organize:</strong> Upload a photo and ask "What is in this image?".</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Activity Feed Widget -->
+            <section class="widget" style="grid-column: span 2;">
+                <div class="widget-header">
+                    <span class="widget-title">System Activity Feed</span>
+                </div>
+                <div id="notifications-container" class="widget-content">
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Loading activity...</p>
+                </div>
+            </section>
+
+            <!-- Interview Performance Widget -->
+            <section class="widget">
+                <div class="widget-header">
+                    <span class="widget-title">Interview Performance</span>
+                </div>
+                <div id="interviews-container" class="widget-content">
+                    <p style="color: var(--text-muted); font-size: 0.875rem;">Loading interview history...</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/dashboard/static/main.js"></script>
+</body>
+</html>

@@ -54,7 +54,7 @@
         </svg>
         <span id="tts-label">Voice Off</span>
       </button>
-      <select id="voice-select" title="Voice" class="hidden text-xs bg-gray-800 border border-gray-700 text-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500 transition-colors">
+      <select id="voice-select" title="Voice" class="text-xs bg-gray-800 border border-gray-700 text-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500 transition-colors">
         <optgroup label="AI Voices (OpenAI)">
           <option value="nova">Nova — warm female</option>
           <option value="shimmer">Shimmer — soft female</option>
@@ -63,8 +63,9 @@
           <option value="fable">Fable — expressive</option>
           <option value="onyx">Onyx — deep male</option>
         </optgroup>
-        <option value="browser">Browser voice (built-in)</option>
+        <option value="browser" selected>Browser voice (built-in)</option>
       </select>
+      <button onclick="testSound()" class="text-[10px] text-gray-500 hover:text-indigo-400 transition-colors underline">Test Sound</button>
     </div>
   </header>
 
@@ -98,163 +99,146 @@
           <!-- Attached file chips (hidden when empty) -->
           <div id="file-chips" class="hidden flex-wrap gap-2"></div>
 
-          <div class="flex gap-2">
-          <!-- Hidden file input -->
-          <input type="file" id="file-input" multiple accept=".txt,.md,.py,.js,.ts,.jsx,.tsx,.json,.csv,.html,.css,.java,.pdf,.docx,.doc,.png,.jpg,.jpeg,.webp,.gif" class="hidden" />
-          <!-- Attach button -->
-          <button
-            id="attach-btn"
-            title="Attach a file"
-            class="bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl px-3 py-2.5 transition-colors shrink-0 flex items-center justify-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5V6H9v9.5a3 3 0 0 0 6 0V5c0-2.76-2.24-5-5-5S5 2.24 5 5v12.5c0 3.87 3.13 7 7 7s7-3.13 7-7V6h-2.5z"/>
-            </svg>
-          </button>
-          <textarea
-            id="input"
-            rows="1"
-            placeholder="Message the agent… (Enter to send, Shift+Enter for new line)"
-            class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-100 placeholder-gray-500 resize-none focus:outline-none focus:border-indigo-500 transition-colors"
-            style="max-height: 150px; overflow-y: auto;"
-          ></textarea>
-          <button
-            id="mic-btn"
-            title="Hold to speak (or click to toggle)"
-            class="bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl px-3 py-2.5 transition-colors shrink-0 flex items-center justify-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm6 9a1 1 0 0 1 2 0 8 8 0 0 1-7 7.94V20h2a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h2v-2.06A8 8 0 0 1 4 10a1 1 0 0 1 2 0 6 6 0 0 0 12 0z"/>
-            </svg>
-          </button>
-          <button
-            id="send-btn"
-            class="bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-xl px-4 py-2.5 text-sm font-medium transition-colors shrink-0"
-          >Send</button>
-          </div><!-- end button row -->
-        </div><!-- end flex col -->
+          <div class="flex items-end gap-2">
+            <div class="relative flex-1">
+              <textarea
+                id="user-input"
+                rows="1"
+                placeholder="Type a message..."
+                class="w-full bg-gray-800 text-white text-sm rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-600 resize-none border border-gray-700"
+              ></textarea>
+              <div class="absolute right-3 bottom-3 flex gap-2">
+                <button id="attach-btn" title="Attach file" class="text-gray-400 hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+              </div>
+            </div>
+            <button
+              id="mic-btn"
+              title="Speak message"
+              class="w-11 h-11 rounded-xl bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:bg-gray-700 flex items-center justify-center transition-all shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <button
+              id="send-btn"
+              class="w-11 h-11 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500 flex items-center justify-center transition-all shrink-0 shadow-lg shadow-indigo-900/20"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+          <p class="text-[10px] text-gray-500 text-center px-4">
+            Press <kbd class="bg-gray-800 px-1 rounded">Enter</kbd> to send, <kbd class="bg-gray-800 px-1 rounded">Shift+Enter</kbd> for new line.
+          </p>
+        </div>
       </div>
     </main>
 
-    <!-- Memory sidebar -->
-    <aside class="w-64 border-l border-gray-800 bg-gray-900 flex flex-col shrink-0 overflow-hidden">
-      <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
-        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Context</h2>
-        <button id="refresh-btn" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Refresh</button>
+    <!-- Sidebar (Memory) -->
+    <aside class="w-80 bg-gray-900 border-l border-gray-800 hidden lg:flex flex-col shrink-0">
+      <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+        <h2 class="font-semibold text-sm text-gray-200">Memory &amp; Context</h2>
+        <button onclick="refreshMemory()" class="text-gray-500 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
       </div>
-      <div id="memory-content" class="flex-1 overflow-y-auto px-4 py-3 text-xs text-gray-400 whitespace-pre-wrap leading-relaxed">
-        Loading...
+      <div id="memory-content" class="flex-1 overflow-y-auto p-4 text-xs text-gray-400 space-y-4">
+        <p class="italic">Loading memory...</p>
       </div>
     </aside>
 
   </div>
 
+  <!-- Hidden file input -->
+  <input type="file" id="file-input" multiple class="hidden" accept="image/*,.pdf,.txt,.docx" />
+
   <script>
     const messagesEl = document.getElementById('messages');
-    const inputEl    = document.getElementById('input');
+    const userInput  = document.getElementById('user-input');
     const sendBtn    = document.getElementById('send-btn');
+    const attachBtn  = document.getElementById('attach-btn');
+    const fileInput  = document.getElementById('file-input');
+    const fileChips  = document.getElementById('file-chips');
     const memoryEl   = document.getElementById('memory-content');
 
-    // ── Utility ──────────────────────────────────────────────────────────────
+    let attachedFiles = [];
+
+    // ── UI Helpers ──────────────────────────────────────────────────────────
 
     function scrollToBottom() {
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function autoResize() {
-      inputEl.style.height = 'auto';
-      inputEl.style.height = Math.min(inputEl.scrollHeight, 150) + 'px';
-    }
-
-    async function refreshMemory() {
-      try {
-        const res = await fetch('/api/memory');
-        const { context } = await res.json();
-        memoryEl.textContent = context;
-      } catch {
-        memoryEl.textContent = 'Could not load context.';
-      }
-    }
-
-    // ── Message rendering ─────────────────────────────────────────────────────
-
-    function appendUserMessage(text, files = []) {
+    function appendUserMessage(text, files=[]) {
       const div = document.createElement('div');
-      div.className = 'flex justify-end';
-      const fileHtml = files.map(f =>
-        `<div class="flex items-center gap-1 text-indigo-200 text-xs mt-1">
-           <span>${f.type.startsWith('image/') ? '🖼' : '📄'}</span>
-           <span class="truncate max-w-[200px]">${escapeHtml(f.name)}</span>
-         </div>`
-      ).join('');
+      div.className = 'flex flex-col items-end gap-2';
+      
+      let filesHtml = '';
+      if (files.length > 0) {
+        filesHtml = `<div class="flex flex-wrap gap-2 justify-end">` + 
+          files.map(f => `<div class="text-[10px] bg-gray-800 border border-gray-700 rounded-md px-2 py-1 text-gray-400">📎 ${f.name}</div>`).join('') +
+          `</div>`;
+      }
+
       div.innerHTML = `
-        <div class="bg-indigo-600 rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-xl text-sm text-white">
-          ${text ? `<div class="whitespace-pre-wrap">${escapeHtml(text)}</div>` : ''}
-          ${fileHtml}
+        <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-2xl text-sm shadow-md">
+          ${escapeHtml(text)}
         </div>
+        ${filesHtml}
       `;
       messagesEl.appendChild(div);
       scrollToBottom();
-    }
-
-    function appendToolBadge(name) {
-      const last = messagesEl.lastElementChild;
-      // Append to existing tool-row or create new one
-      let toolRow = last?.dataset?.toolRow ? last : null;
-      if (!toolRow) {
-        toolRow = document.createElement('div');
-        toolRow.dataset.toolRow = '1';
-        toolRow.className = 'flex gap-2 flex-wrap pl-10';
-        messagesEl.appendChild(toolRow);
-      }
-      const badge = document.createElement('span');
-      badge.className = 'inline-flex items-center gap-1 bg-gray-800 border border-gray-700 text-gray-400 rounded-full px-2.5 py-1 text-xs animate-pulse';
-      badge.dataset.tool = name;
-      badge.innerHTML = `<span>🔧</span> ${escapeHtml(name)}`;
-      toolRow.appendChild(badge);
-      scrollToBottom();
-      return badge;
-    }
-
-    function markToolDone(name) {
-      const badge = messagesEl.querySelector(`[data-tool="${name}"]`);
-      if (badge) {
-        badge.classList.remove('animate-pulse', 'text-gray-400', 'border-gray-700');
-        badge.classList.add('text-green-400', 'border-green-800');
-        badge.innerHTML = `<span>✓</span> ${escapeHtml(name)}`;
-      }
-    }
-
-    function appendTypingIndicator() {
-      const div = document.createElement('div');
-      div.id = 'typing';
-      div.className = 'flex gap-3';
-      div.innerHTML = `
-        <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs shrink-0 mt-1">A</div>
-        <div class="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-        </div>
-      `;
-      messagesEl.appendChild(div);
-      scrollToBottom();
-      return div;
-    }
-
-    function removeTypingIndicator() {
-      document.getElementById('typing')?.remove();
     }
 
     function appendAgentMessage(text) {
       const div = document.createElement('div');
-      div.className = 'flex gap-3';
+      div.className = 'flex gap-3 group';
       div.innerHTML = `
         <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs shrink-0 mt-1">A</div>
-        <div class="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl prose text-sm text-gray-200"></div>
+        <div class="relative bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-2xl prose text-sm text-gray-200">
+          <div class="agent-text"></div>
+          <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button title="Read response" class="p-1 hover:bg-gray-700 rounded" onclick="speakResponse(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </button>
+            <button title="Copy to clipboard" class="p-1 hover:bg-gray-700 rounded" onclick="copyToClipboard(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
       `;
-      div.querySelector('.prose').innerHTML = marked.parse(text);
+      div.querySelector('.agent-text').innerHTML = marked.parse(text);
       messagesEl.appendChild(div);
       scrollToBottom();
       speakText(text);
+    }
+
+    async function speakResponse(btn) {
+      const text = btn.closest('.relative').querySelector('.agent-text').innerText;
+      window.speechSynthesis.cancel();
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      speechQueue = [];
+      isSpeaking = false;
+      
+      const oldState = ttsEnabled;
+      ttsEnabled = true;
+      await speakText(text);
+      ttsEnabled = oldState;
+    }
+
+    function copyToClipboard(btn) {
+      const text = btn.closest('.relative').querySelector('.agent-text').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const originalIcon = btn.innerHTML;
+        btn.innerHTML = '✅';
+        setTimeout(() => btn.innerHTML = originalIcon, 2000);
+      });
     }
 
     function escapeHtml(str) {
@@ -264,154 +248,143 @@
     // ── Send message ──────────────────────────────────────────────────────────
 
     async function sendMessage() {
-      const message = inputEl.value.trim();
-      if (!message && attachedFiles.length === 0) return;
+      const text = userInput.value.trim();
+      if (!text && attachedFiles.length === 0) return;
 
-      const filesToSend = [...attachedFiles];
+      appendUserMessage(text, attachedFiles);
+      userInput.value = '';
+      userInput.style.height = 'auto';
+      
+      // Clear chips
+      const currentFiles = [...attachedFiles];
       attachedFiles = [];
-      fileChips.innerHTML = '';
-      fileChips.classList.add('hidden');
-      fileChips.classList.remove('flex');
+      renderFileChips();
 
-      inputEl.value = '';
-      autoResize();
-      sendBtn.disabled = true;
-
-      appendUserMessage(message, filesToSend);
-      const typingEl = appendTypingIndicator();
-
-      // Send JSON for text-only, FormData only when files are attached
-      let fetchInit;
-      if (filesToSend.length > 0) {
-        const formData = new FormData();
-        formData.append('message', message);
-        for (const f of filesToSend) formData.append('files', f);
-        fetchInit = { method: 'POST', body: formData };
-      } else {
-        fetchInit = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message }),
-        };
-      }
+      // Show typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing';
+      typingDiv.className = 'flex gap-3';
+      typingDiv.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-xs shrink-0 mt-1">A</div>
+        <div class="bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      `;
+      messagesEl.appendChild(typingDiv);
+      scrollToBottom();
 
       try {
-        const response = await fetch('/api/chat', fetchInit);
+        const formData = new FormData();
+        formData.append('message', text);
+        currentFiles.forEach(f => formData.append('files', f));
+
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          body: formData
+        });
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = '';
-        let typingRemoved = false;
+        let fullText = '';
 
         while (true) {
-          const { value, done } = await reader.read();
+          const { done, value } = await reader.read();
           if (done) break;
 
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop(); // Keep incomplete line in buffer
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
 
           for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            let event;
-            try { event = JSON.parse(line.slice(6)); } catch { continue; }
-
-            if (event.type === 'tool') {
-              if (!typingRemoved) { removeTypingIndicator(); typingRemoved = true; }
-              appendToolBadge(event.name);
-            } else if (event.type === 'result') {
-              markToolDone(event.name);
-            } else if (event.type === 'text') {
-              if (!typingRemoved) { removeTypingIndicator(); typingRemoved = true; }
-              appendAgentMessage(event.content);
-            } else if (event.type === 'done') {
-              refreshMemory();
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.substring(6));
+              
+              if (data.type === 'text') {
+                fullText += data.content;
+                updateTyping(fullText);
+              } else if (data.type === 'tool') {
+                // Potential future: show tool execution status
+              }
             }
           }
         }
 
-        if (!typingRemoved) removeTypingIndicator();
+        removeTyping();
+        appendAgentMessage(fullText);
 
       } catch (err) {
-        removeTypingIndicator();
+        removeTyping();
         appendAgentMessage(`**Error:** ${err.message}`);
       }
-
-      sendBtn.disabled = false;
-      inputEl.focus();
     }
 
-    // ── Event listeners ───────────────────────────────────────────────────────
-
-    sendBtn.addEventListener('click', sendMessage);
-
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+    function updateTyping(text) {
+      const typing = document.getElementById('typing');
+      if (typing) {
+        const bubble = typing.querySelector('.bg-gray-800');
+        bubble.className = 'bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 prose text-sm text-gray-200 w-full max-w-2xl';
+        bubble.innerHTML = marked.parse(text + ' ▌');
+        scrollToBottom();
       }
-    });
+    }
 
-    inputEl.addEventListener('input', autoResize);
+    function removeTyping() {
+      document.getElementById('typing')?.remove();
+    }
 
-    document.getElementById('refresh-btn').addEventListener('click', refreshMemory);
-
-    // ── Attachments ───────────────────────────────────────────────────────────
-
-    const attachBtn  = document.getElementById('attach-btn');
-    const fileInput  = document.getElementById('file-input');
-    const fileChips  = document.getElementById('file-chips');
-    let attachedFiles = [];   // Array of File objects
+    // ── File attachments ──────────────────────────────────────────────────────
 
     attachBtn.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', () => {
-      for (const file of fileInput.files) {
-        if (!attachedFiles.find(f => f.name === file.name)) {
-          attachedFiles.push(file);
-          addChip(file);
-        }
-      }
-      fileInput.value = '';   // reset so same file can be re-added after removal
-      fileChips.classList.toggle('hidden', attachedFiles.length === 0);
-      fileChips.classList.toggle('flex', attachedFiles.length > 0);
+      attachedFiles = [...attachedFiles, ...Array.from(fileInput.files)];
+      renderFileChips();
+      fileInput.value = ''; // reset
     });
 
-    function addChip(file) {
-      const isImage = file.type.startsWith('image/');
-      const chip = document.createElement('div');
-      chip.dataset.name = file.name;
-      chip.className = 'flex items-center gap-1.5 bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-gray-300';
-      chip.innerHTML = `
-        <span>${isImage ? '🖼' : '📄'}</span>
-        <span class="max-w-[140px] truncate">${escapeHtml(file.name)}</span>
-        <button class="text-gray-500 hover:text-red-400 ml-0.5 leading-none" data-remove="${escapeHtml(file.name)}">✕</button>
-      `;
-      chip.querySelector('button').addEventListener('click', () => {
-        attachedFiles = attachedFiles.filter(f => f.name !== file.name);
-        chip.remove();
-        fileChips.classList.toggle('hidden', attachedFiles.length === 0);
-        fileChips.classList.toggle('flex', attachedFiles.length > 0);
+    function renderFileChips() {
+      fileChips.innerHTML = '';
+      if (attachedFiles.length === 0) {
+        fileChips.classList.add('hidden');
+        return;
+      }
+      fileChips.classList.remove('hidden');
+      attachedFiles.forEach((file, idx) => {
+        const chip = document.createElement('div');
+        chip.className = 'flex items-center gap-1.5 bg-indigo-900/40 text-indigo-300 border border-indigo-500/30 rounded-full px-2.5 py-1 text-[10px] font-medium';
+        chip.innerHTML = `
+          <span class="truncate max-w-[100px]">${file.name}</span>
+          <button onclick="removeFile(${idx})" class="hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        `;
+        fileChips.appendChild(chip);
       });
-      fileChips.appendChild(chip);
     }
 
-    // ── Text-to-speech ────────────────────────────────────────────────────────
+    window.removeFile = (idx) => {
+      attachedFiles.splice(idx, 1);
+      renderFileChips();
+    };
+
+    // ── Text-to-speech (High Reliability Refactor) ──────────────────────────
 
     const ttsBtn      = document.getElementById('tts-btn');
     const ttsIcon     = document.getElementById('tts-icon');
     const ttsLabel    = document.getElementById('tts-label');
     const voiceSelect = document.getElementById('voice-select');
+    
     let ttsEnabled    = false;
     let openaiTTSAvailable = false;
     let currentAudio  = null;
+    let speechQueue   = [];
+    let isSpeaking    = false;
 
-    // Check if OpenAI TTS is available on the backend
+    // Check availability
     fetch('/api/tts/available').then(r => r.json()).then(d => {
       openaiTTSAvailable = d.available;
       if (!openaiTTSAvailable) {
-        // Remove AI voice options, only show browser fallback
-        voiceSelect.querySelector('optgroup').remove();
+        const optgroup = voiceSelect.querySelector('optgroup');
+        if (optgroup) optgroup.remove();
       }
     }).catch(() => {});
 
@@ -424,9 +397,10 @@
         .replace(/#+\s/g, '')
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
         .replace(/[-*]\s/g, '')
-        .replace(/\|.*?\|/g, '')          // strip table rows
+        .replace(/\|.*?\|/g, '')
         .replace(/\n{2,}/g, '. ')
         .replace(/\n/g, ' ')
+        .replace(/&[a-z]+;/g, '')
         .trim();
     }
 
@@ -435,52 +409,75 @@
       const clean = stripMarkdown(text);
       if (!clean) return;
 
+      console.log("TTS Queuing:", clean.substring(0, 30) + "...");
+      speechQueue.push(clean);
+      if (!isSpeaking) processQueue();
+    }
+
+    async function processQueue() {
+      if (speechQueue.length === 0) {
+        isSpeaking = false;
+        return;
+      }
+
+      isSpeaking = true;
+      const text = speechQueue.shift();
       const voice = voiceSelect.value;
 
-      // ── OpenAI TTS (high quality) ──────────────────────────────────────────
+      // 1. OpenAI TTS Strategy
       if (openaiTTSAvailable && voice !== 'browser') {
-        if (currentAudio) { currentAudio.pause(); currentAudio = null; }
         try {
+          console.log("🌐 Requesting OpenAI Voice:", voice);
           const resp = await fetch('/api/tts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: clean, voice }),
+            body: JSON.stringify({ text, voice }),
           });
           if (resp.ok) {
             const blob = await resp.blob();
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
             currentAudio = new Audio(URL.createObjectURL(blob));
+            currentAudio.onended = () => processQueue();
+            currentAudio.onerror = () => { console.error("Audio playback error"); processQueue(); };
             currentAudio.play();
             return;
           }
-        } catch (e) { /* fall through to browser TTS */ }
+        } catch (e) { console.error("OpenAI TTS Failed:", e); }
       }
 
-      // ── Browser TTS fallback ───────────────────────────────────────────────
-      if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
+      // 2. Browser TTS Fallback Strategy
+      if (!window.speechSynthesis) {
+        isSpeaking = false;
+        return;
+      }
 
-      // Pick best available voice — wait for voices to load if needed
-      const speak = (voices) => {
-        const utt = new SpeechSynthesisUtterance(clean);
-        utt.rate  = 1.0;
-        utt.pitch = 1.0;
-        const preferred = voices.find(v =>
-          /premium|enhanced|neural|siri/i.test(v.name) && /en[-_]?(us|gb|au)/i.test(v.lang)
-        ) || voices.find(v =>
-          /samantha|google us english|alex|karen|moira|daniel/i.test(v.name)
-        ) || voices.find(v => /en[-_]?(us|gb)/i.test(v.lang));
-        if (preferred) utt.voice = preferred;
-        window.speechSynthesis.speak(utt);
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const preferred = voices.find(v => /premium|enhanced|neural|siri/i.test(v.name)) || 
+                          voices.find(v => /google|samantha/i.test(v.name.toLowerCase())) || 
+                          voices[0];
+        utterance.voice = preferred;
+      }
+
+      utterance.onend = () => processQueue();
+      utterance.onerror = (e) => {
+        if (e.error !== 'canceled' && e.error !== 'interrupted') {
+          console.error("SpeechSynthesis error:", e.error);
+        }
+        processQueue();
       };
 
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length) {
-        speak(voices);
-      } else {
-        window.speechSynthesis.addEventListener('voiceschanged', () => {
-          speak(window.speechSynthesis.getVoices());
-        }, { once: true });
-      }
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function testSound() {
+      console.log("🔊 Testing Sound Output...");
+      window.speechSynthesis?.cancel();
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      speechQueue = ["Audio test. If you hear this, your agent is ready."];
+      isSpeaking = false;
+      processQueue();
     }
 
     ttsBtn.addEventListener('click', () => {
@@ -489,15 +486,16 @@
         ttsBtn.classList.replace('text-gray-400', 'text-indigo-400');
         ttsBtn.classList.replace('border-gray-700', 'border-indigo-500');
         ttsLabel.textContent = 'Voice On';
-        ttsIcon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
         voiceSelect.classList.remove('hidden');
+        // Initial "wake up"
+        const wake = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(wake);
       } else {
+        window.speechSynthesis.cancel();
         if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-        window.speechSynthesis?.cancel();
         ttsBtn.classList.replace('text-indigo-400', 'text-gray-400');
         ttsBtn.classList.replace('border-indigo-500', 'border-gray-700');
         ttsLabel.textContent = 'Voice Off';
-        ttsIcon.innerHTML = '<path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
         voiceSelect.classList.add('hidden');
       }
     });
@@ -505,7 +503,7 @@
     // ── Voice input (Web Speech API) ──────────────────────────────────────────
 
     const micBtn = document.getElementById('mic-btn');
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.speechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       micBtn.title = 'Voice input not supported in this browser (use Chrome or Edge)';
@@ -530,49 +528,65 @@
       function stopRecording() {
         isRecording = false;
         micBtn.classList.remove('recording');
-        micBtn.title = 'Click to speak';
+        micBtn.title = 'Speak message';
         recognition.stop();
       }
 
       micBtn.addEventListener('click', () => {
-        if (isRecording) {
-          stopRecording();
-        } else {
-          startRecording();
-        }
+        if (isRecording) stopRecording();
+        else startRecording();
       });
 
-      // Show interim results in the textarea while speaking
-      recognition.addEventListener('result', (e) => {
+      recognition.onresult = (e) => {
         let interim = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const t = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalTranscript += t;
-          else interim = t;
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+          if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+          else interim += e.results[i][0].transcript;
         }
-        inputEl.value = finalTranscript + interim;
-        autoResize();
-      });
+        userInput.value = finalTranscript + interim;
+        userInput.style.height = 'auto';
+        userInput.style.height = userInput.scrollHeight + 'px';
+      };
 
-      // Auto-send when speech ends naturally
-      recognition.addEventListener('end', () => {
-        micBtn.classList.remove('recording');
-        isRecording = false;
-        micBtn.title = 'Click to speak';
-        if (finalTranscript.trim()) {
+      recognition.onend = () => {
+        if (isRecording) stopRecording();
+        if (finalTranscript.trim().length > 5) {
           sendMessage();
         }
-      });
+      };
 
-      recognition.addEventListener('error', (e) => {
+      recognition.onerror = (e) => {
         stopRecording();
         if (e.error !== 'no-speech' && e.error !== 'aborted') {
           appendAgentMessage(`**Mic error:** ${e.error}. Make sure your browser has microphone permission.`);
         }
-      });
+      };
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
+
+    async function refreshMemory() {
+      try {
+        const resp = await fetch('/api/memory');
+        const data = await resp.json();
+        memoryEl.innerHTML = marked.parse(data.context || 'No memory yet.');
+      } catch (e) {
+        memoryEl.innerHTML = '<p class="text-red-500">Failed to load memory.</p>';
+      }
+    }
+
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    userInput.addEventListener('input', () => {
+      userInput.style.height = 'auto';
+      userInput.style.height = userInput.scrollHeight + 'px';
+    });
+
     refreshMemory();
   </script>
 </body>

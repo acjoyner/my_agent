@@ -4,6 +4,7 @@ No extra API keys needed.
 """
 
 import json
+from tools.client import client
 
 
 def search_web(query: str, num_results: int = 5) -> dict:
